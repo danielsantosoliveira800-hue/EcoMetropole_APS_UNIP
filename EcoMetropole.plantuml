@@ -1,0 +1,152 @@
+@startuml
+title __ECOMETROPOLE - Class Diagram__
+
+skinparam classAttributeIconSize 0
+
+package "main" {
+
+    class EcoMetropole <<JPanel, Runnable>> {
+        - {static} FPS : int
+        - {static} FPS_DELAY : int
+        - gerenciador : GerenciadorJogo
+        - gameThread : Thread
+        - running : boolean
+        --
+        + EcoMetropole()
+        + addNotify() : void
+        + run() : void
+        - atualizar() : void
+        # paintComponent(g : Graphics) : void
+        + {static} main(args : String[]) : void
+    }
+
+    package "engine" {
+
+        class GerenciadorJogo <<controller>> {
+            - entidades : ArrayList<Entidade>
+            - jogador : Jogador
+            - nuvemToxica : NuvemToxica
+            - telaFim : TelaFim
+            - frameCount : int
+            - sustentabilidade : int
+            - poluicao : int
+            - pontuacao : int
+            --
+            + GerenciadorJogo()
+            + reiniciar() : void
+            + atualizar() : void
+            - checarColisoes() : void
+            + desenhar(g2d : Graphics2D, w : int, h : int) : void
+            + clicar(x : int, y : int, w : int, h : int) : void
+            + ordenarEntidadesPorY() : void
+            + getJogador() : Jogador
+        }
+
+        class GerenciadorSom <<utility>> {
+            + {static} tocar(dados : byte[], vol : float) : void
+            + {static} gerarTom(f : int, ms : int, a : float) : byte[]
+            + {static} gerarRuido(ms : int, a : float) : byte[]
+            + {static} itemVerde() : void
+            + {static} itemLaranja() : void
+            + {static} dano() : void
+            + {static} vitoria() : void
+            + {static} derrota() : void
+        }
+    }
+
+    package "model" {
+
+        abstract class Entidade {
+            # x : int
+            # y : int
+            # largura : int
+            # altura : int
+            --
+            + Entidade(x : int, y : int, largura : int, altura : int)
+            + getBounds() : Rectangle
+            + getX() : int
+            + getY() : int
+            + {abstract} atualizar() : void
+            + {abstract} desenhar(g2d : Graphics2D) : void
+        }
+
+        class Jogador {
+            - {static} VELOCIDADE : int
+            - animFrame : int
+            + up : boolean
+            + down : boolean
+            + left : boolean
+            + right : boolean
+            --
+            + Jogador(x : int, y : int)
+            + atualizar() : void
+            + desenhar(g2d : Graphics2D) : void
+            + getBounds() : Rectangle
+            + setUp(b : boolean) : void
+            + setDown(b : boolean) : void
+            + setLeft(b : boolean) : void
+            + setRight(b : boolean) : void
+        }
+
+        class Item {
+            - tipo : Tipo
+            - valor : int
+            - rotacao : double
+            - pulsacao : double
+            --
+            + Item(x : int, y : int, tipo : Tipo)
+            + atualizar() : void
+            + desenhar(g2d : Graphics2D) : void
+            + getTipo() : Tipo
+            + getValor() : int
+        }
+
+        enum Tipo {
+            POSITIVO
+            NEGATIVO
+        }
+
+        class NuvemToxica {
+            - velocidade : float
+            --
+            + NuvemToxica(x : int, y : int)
+            + atualizar() : void
+            + atualizar(alvoX : int, alvoY : int) : void
+            + desenhar(g2d : Graphics2D) : void
+            + getBounds() : Rectangle
+        }
+
+        class TelaFim {
+            - ativa : boolean
+            - estado : Estado
+            --
+            + TelaFim()
+            + ativar(estado : Estado) : void
+            + desenhar(g2d : Graphics2D, w : int, h : int) : void
+            + clicouReiniciar(x : int, y : int, w : int, h : int) : boolean
+            + clicouFechar(x : int, y : int, w : int, h : int) : boolean
+            + isAtiva() : boolean
+        }
+
+        enum Estado {
+            VITORIA
+            DERROTA
+        }
+    }
+}
+
+' Herança
+Entidade <|-- Jogador
+Entidade <|-- Item
+Entidade <|-- NuvemToxica
+
+' Associações
+EcoMetropole --> GerenciadorJogo
+GerenciadorJogo --> Jogador
+GerenciadorJogo --> NuvemToxica
+GerenciadorJogo --> TelaFim
+GerenciadorJogo o-- Entidade : entidades
+Item +-- Tipo
+TelaFim +-- Estado
+
+@enduml
